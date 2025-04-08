@@ -13,11 +13,6 @@ A Flask web application that compresses images and adds date/time watermarks.
 
 The application is live at: (https://image-compressor-t82d.onrender.com)
 
-## Screenshots
-
-![Homepage](https://via.placeholder.com/800x400)
-![Compression Results](https://via.placeholder.com/800x400)
-
 ## Technologies Used
 
 - **Backend**: Flask (Python)
