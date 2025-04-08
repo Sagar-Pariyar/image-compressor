@@ -1,7 +1,7 @@
+import os
 from flask import Flask, render_template, request, send_file, url_for, redirect, flash, jsonify
 from PIL import Image, ImageDraw, ImageFont, ExifTags
 from datetime import datetime
-import os
 import io
 import uuid
 from zipfile import ZipFile
@@ -9,8 +9,8 @@ from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 app.secret_key = "compression_app_secret_key"
-app.config['UPLOAD_FOLDER'] = 'uploads'
-app.config['COMPRESSED_FOLDER'] = 'compressed'
+app.config['UPLOAD_FOLDER'] = os.path.join(os.getcwd(), 'uploads')
+app.config['COMPRESSED_FOLDER'] = os.path.join(os.getcwd(), 'compressed')
 
 # Create folders if they don't exist
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
@@ -314,4 +314,5 @@ def cleanup_files():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host='0.0.0.0', port=port)
