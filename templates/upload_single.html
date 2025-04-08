@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Single Photo Upload - SmartCompress</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+        }
+        #preview {
+            max-height: 500px;
+            object-fit: contain;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+    <header class="py-4 gradient-bg">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-between">
+                <a href="/" class="flex items-center">
+                    <i data-lucide="camera" class="h-8 w-8 mr-2 text-blue-400"></i>
+                    <h1 class="text-2xl font-bold">SmartCompress</h1>
+                </a>
+                <nav>
+                    <a href="/" class="text-gray-300 hover:text-white flex items-center">
+                        <i data-lucide="arrow-left" class="h-4 w-4 mr-1"></i>
+                        Back to Home
+                    </a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-12">
+        <div class="max-w-3xl mx-auto">
+            <h1 class="text-3xl font-bold mb-6 text-center">Single Photo Upload</h1>
+            <p class="text-gray-300 text-center mb-8">Compress and embed a timestamp on your photo</p>
+
+            <div class="bg-gray-800 rounded-lg p-6 mb-8">
+                <form id="uploadForm" action="/upload" method="post" enctype="multipart/form-data" class="mb-6">
+                    <div class="mb-6">
+                        <label class="block text-gray-300 text-sm font-bold mb-2" for="file">
+                            Choose Photo
+                        </label>
+                        <div class="relative border-2 border-dashed border-gray-600 rounded-lg p-8 text-center" id="dropArea">
+                            <input class="hidden" type="file" name="file" id="file" accept="image/*">
+                            <div class="flex flex-col items-center justify-center space-y-4">
+                                <i data-lucide="image" class="h-16 w-16 text-gray-500"></i>
+                                <div class="font-medium text-gray-300">
+                                    Drag & drop your photo here or
+                                    <button type="button" id="browseButton" class="text-blue-400 hover:text-blue-300">
+                                        browse
+                                    </button>
+                                </div>
+                                <p class="text-xs text-gray-500">
+                                    Supported formats: JPG, PNG, JPEG, WEBP
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="previewContainer" class="hidden mb-6">
+                        <label class="block text-gray-300 text-sm font-bold mb-2">
+                            Preview
+                        </label>
+                        <div class="bg-gray-700 rounded-lg p-4 flex justify-center">
+                            <img id="preview" src="#" alt="Image preview" class="max-w-full rounded">
+                        </div>
+                        <div class="mt-2 text-sm text-gray-400 flex items-center">
+                            <i data-lucide="file" class="h-4 w-4 mr-1"></i>
+                            <span id="fileName"></span>
+                            <span class="mx-2">•</span>
+                            <span id="fileSize"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-6">
+                        <label class="block text-gray-300 text-sm font-bold mb-2" for="quality">
+                            Compression Quality: <span id="qualityValue">30</span>%
+                        </label>
+                        <input type="range" id="quality" name="quality" min="1" max="95" value="30" 
+                               class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                        <div class="flex justify-between text-xs text-gray-500 mt-1">
+                            <span>Higher Compression</span>
+                            <span>Better Quality</span>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-center">
+                        <button type="submit" id="submitBtn" disabled
+                                class="bg-blue-600 disabled:bg-gray-600 disabled:opacity-50 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg flex items-center">
+                            <i data-lucide="zap" class="h-5 w-5 mr-2"></i>
+                            Compress
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="text-center">
+                <a href="/upload-bulk" class="text-blue-400 hover:text-blue-300 inline-flex items-center">
+                    <i data-lucide="folder" class="h-4 w-4 mr-1"></i>
+                    Switch to Bulk Upload
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        const fileInput = document.getElementById('file');
+        const browseButton = document.getElementById('browseButton');
+        const previewContainer = document.getElementById('previewContainer');
+        const preview = document.getElementById('preview');
+        const fileName = document.getElementById('fileName');
+        const fileSize = document.getElementById('fileSize');
+        const qualitySlider = document.getElementById('quality');
+        const qualityValue = document.getElementById('qualityValue');
+        const submitBtn = document.getElementById('submitBtn');
+        const dropArea = document.getElementById('dropArea');
+        const form = document.getElementById('uploadForm');
+
+        // Update quality value display
+        qualitySlider.addEventListener('input', () => {
+            qualityValue.textContent = qualitySlider.value;
+        });
+
+        // Browse button functionality
+        browseButton.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        // File input change handler
+        fileInput.addEventListener('change', handleFileSelect);
+
+        // Drag and drop functionality
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropArea.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight() {
+            dropArea.classList.add('border-blue-500');
+            dropArea.classList.remove('border-gray-600');
+        }
+
+        function unhighlight() {
+            dropArea.classList.remove('border-blue-500');
+            dropArea.classList.add('border-gray-600');
+        }
+
+        dropArea.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            
+            if (files.length > 0) {
+                fileInput.files = files;
+                handleFileSelect();
+            }
+        }
+
+        function handleFileSelect() {
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                
+                // Display file info
+                fileName.textContent = file.name;
+                fileSize.textContent = formatFileSize(file.size);
+                
+                // Show preview
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    previewContainer.classList.remove('hidden');
+                    submitBtn.disabled = false;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes < 1024) return bytes + ' bytes';
+            else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+            else return (bytes / 1048576).toFixed(1) + ' MB';
+        }
+
+        // Handle form submission
+        form.addEventListener('submit', function(e) {
+            if (fileInput.files.length === 0) {
+                e.preventDefault();
+                alert('Please select a file first');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bulk Compression Results - SmartCompress</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+        }
+    </style>
+    <script>
+        function cleanupAndRedirect() {
+            fetch('/cleanup', { method: 'POST' })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.href = "/";
+                    } else {
+                        alert("Cleanup failed: " + data.error);
+                    }
+                });
+        }
+    </script>
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+    <header class="py-4 gradient-bg">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-between">
+                <a href="/" class="flex items-center">
+                    <i data-lucide="camera" class="h-8 w-8 mr-2 text-blue-400"></i>
+                    <h1 class="text-2xl font-bold">SmartCompress</h1>
+                </a>
+                <nav>
+                    <a href="/" class="text-gray-300 hover:text-white flex items-center">
+                        <i data-lucide="home" class="h-4 w-4 mr-1"></i>
+                        Home
+                    </a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-12">
+        <div class="max-w-4xl mx-auto">
+            <div class="text-center mb-8">
+                <div class="inline-flex items-center justify-center bg-green-600 text-white rounded-full p-2 mb-4">
+                    <i data-lucide="check" class="h-6 w-6"></i>
+                </div>
+                <h1 class="text-3xl font-bold mb-2">Bulk Compression Complete!</h1>
+                <p class="text-gray-300">
+                    All {{image_count}} photos have been optimized with timestamps embedded.
+                </p>
+            </div>
+
+            <div class="bg-gray-800 rounded-lg p-6 mb-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                        <h2 class="text-xl font-bold mb-4 flex items-center">
+                            <i data-lucide="folder" class="h-5 w-5 mr-2 text-gray-400"></i>
+                            Original Photos
+                        </h2>
+                        <div class="bg-gray-700 rounded-lg p-6 flex flex-col items-center justify-center">
+                            <i data-lucide="folder" class="h-24 w-24 text-gray-500 mb-4"></i>
+                            <div class="text-center">
+                                <p class="font-bold">{{image_count}} Photos</p>
+                                <p class="text-gray-400 text-sm">Total Size: {{total_original_size_formatted}}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h2 class="text-xl font-bold mb-4 flex items-center">
+                            <i data-lucide="folder-check" class="h-5 w-5 mr-2 text-blue-400"></i>
+                            Compressed Photos with Timestamps
+                        </h2>
+                        <div class="bg-gray-700 rounded-lg p-6 flex flex-col items-center justify-center">
+                            <i data-lucide="folder-check" class="h-24 w-24 text-blue-400 mb-4"></i>
+                            <div class="text-center">
+                                <p class="font-bold">{{image_count}} Photos</p>
+                                <p class="text-gray-400 text-sm">Total Size: {{total_compressed_size_formatted}}</p>
+                                <p class="text-green-400 text-sm">{{total_reduction_percentage}}% reduction</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-gray-800 rounded-lg p-6 mb-8">
+                <h2 class="text-xl font-bold mb-4">Compression Summary</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                    <div class="bg-gray-700 p-4 rounded-lg">
+                        <p class="text-gray-400 text-sm mb-1">Quality Level</p>
+                        <p class="text-2xl font-bold">{{quality_used}}%</p>
+                    </div>
+                    <div class="bg-gray-700 p-4 rounded-lg">
+                        <p class="text-gray-400 text-sm mb-1">Total Space Saved</p>
+                        <p class="text-2xl font-bold">{{total_saved_formatted}}</p>
+                    </div>
+                    <div class="bg-gray-700 p-4 rounded-lg">
+                        <p class="text-gray-400 text-sm mb-1">Overall Reduction</p>
+                        <p class="text-2xl font-bold text-green-400">{{total_reduction_percentage}}%</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-col md:flex-row gap-4 justify-center">
+                <a href="{{download_zip_url}}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center">
+                    <i data-lucide="download" class="h-5 w-5 mr-2"></i>
+                    Download All Compressed Photos (ZIP)
+                </a>
+                <a href="javascript:void(0)" onclick="cleanupAndRedirect()" class="border border-gray-600 hover:border-gray-500 text-gray-300 hover:text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center">
+                    <i data-lucide="refresh-cw" class="h-5 w-5 mr-2"></i>
+                    Process More Photos
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+    </script>
+</body>
+</html>
